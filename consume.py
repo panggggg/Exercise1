@@ -1,14 +1,18 @@
 import pymongo
 import pika
+import redis
 
 client = pymongo.MongoClient("localhost", 27017)
 
 mydb = client["mydb"]
 
 mycol = mydb["people"]
+# print(client.list_database_names())
 
-data = {"name": "Pang", "age": 21}
-mycol.insert_one(data)
+redisClient = redis.createClient()
+# redisClient.on('error', () => {
+
+# })
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
 channel = connection.channel()
@@ -21,9 +25,19 @@ channel.queue_bind(queue=queue_name, exchange="exercise", routing_key="")
 
 def callback(ch, method, properties, body):
 
+    data = body.decode("UTF-8")
+
     print("[X] Get data")
-    print(body)
+    print(type(data))
+    print(
+        f"""
+        Name: {data}
+        """
+    )
     print("[X] Done")
+
+    db = {"name": data}
+    mycol.insert_one(db)
 
     channel.basic_ack(delivery_tag=method.delivery_tag)
 
