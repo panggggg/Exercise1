@@ -9,10 +9,8 @@ mydb = client["mydb"]
 mycol = mydb["people"]
 # print(client.list_database_names())
 
-redisClient = redis.createClient()
-# redisClient.on('error', () => {
+redis_connection = redis.Redis(host="localhost", port=6379, db=0)
 
-# })
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
 channel = connection.channel()
@@ -34,10 +32,16 @@ def callback(ch, method, properties, body):
         Name: {data}
         """
     )
-    print("[X] Done")
 
-    db = {"name": data}
-    mycol.insert_one(db)
+    if redis_connection.get(data) is None:
+        db = {"name": data}
+        mycol.insert_one(db)
+        redis_connection.set(data, data)
+        print("Save name to MongoDB")
+    else:
+        print("Found Name in MongoDB")
+
+    print("[X] Done")
 
     channel.basic_ack(delivery_tag=method.delivery_tag)
 
