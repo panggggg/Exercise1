@@ -9,7 +9,9 @@ mydb = client["mydb"]
 mycol = mydb["people"]
 # print(client.list_database_names())
 
-redis_connection = redis.Redis(host="localhost", port=6379, db=0)
+redis_connection = redis.Redis(
+    host="localhost", port=6379, db=0
+)  # connect redis #db 0-15
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
@@ -33,13 +35,13 @@ def callback(ch, method, properties, body):
         """
     )
 
-    if redis_connection.get(data) is None:
+    if redis_connection.get(data) is None:  # get Key ถ้ายังไม่มี Key นี้
         db = {"name": data}
-        mycol.insert_one(db)
-        redis_connection.set(data, data)
-        print("Save name to MongoDB")
-    else:
-        print("Found Name in MongoDB")
+        mycol.insert_one(db)  # save ลง db
+        redis_connection.set(data, data)  # set Key Value
+        print("Save name into the MongoDB")
+    else:  # มี Key นี้แล้ว
+        print("This name already has in the MongoDB")
 
     print("[X] Done")
 
