@@ -2,16 +2,15 @@ import pymongo
 import pika
 import redis
 
-client = pymongo.MongoClient("localhost", 27017)
+client = pymongo.MongoClient("localhost", 27018)
 
 mydb = client["mydb"]
 
 mycol = mydb["people"]
 # print(client.list_database_names())
 
-redis_connection = redis.Redis(
-    host="localhost", port=6379, db=0
-)  # connect redis #db 0-15
+redis_connection = redis.Redis(host="localhost", port=6380, db=0)  # connect redis
+# db 0-15
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
