@@ -40,6 +40,7 @@ def callback(ch, method, properties, body):
         mycol.insert_one(db)  # save ลง db
         redis_connection.set(data, data)  # set Key Value
         print("Save name into the MongoDB")
+
     else:  # มี Key นี้แล้ว
         print("This name already has in the MongoDB")
 
