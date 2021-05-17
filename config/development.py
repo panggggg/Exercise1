@@ -5,7 +5,7 @@ config = {
         "user": "root",
         "password": "root",
         "auth_db": "admin",
-        "db": "mydb",
+        "db": "mydatabase",
         "collection": "people",
     }
 }
