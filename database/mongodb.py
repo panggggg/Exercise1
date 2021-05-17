@@ -1,4 +1,3 @@
-from logging import info
 import pymongo
 
 
@@ -24,3 +23,7 @@ class MongoDB:
         )
         db = client[self.db]
         self.connection = db[self.collection]
+
+    def insert(self, data):
+        print(data)
+        return self.connection.insert_one(data)
