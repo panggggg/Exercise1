@@ -1,14 +1,34 @@
 from logging import info
-import pymongo
+from weakref import ProxyTypes
 import pika
+from pymongo import mongo_client
+from pymongo import collection
 import redis
 import json
 
-client = pymongo.MongoClient("localhost", 27018)
+from database.mongodb import MongoDB
+from config.development import config
 
-mydb = client["mydb"]
+mongo_config = config["mongo_config"]
+print("Mongo_config", mongo_config)
 
-mycol = mydb["people"]
+mongo_db = MongoDB(
+    mongo_config["host"],
+    mongo_config["port"],
+    mongo_config["user"],
+    mongo_config["password"],
+    mongo_config["auth_db"],
+    mongo_config["db"],
+    mongo_config["collection"],
+)
+mongo_db._connect()
+
+
+# client = pymongo.MongoClient("localhost", 27018)
+
+# mydb = client["mydb"]
+
+# mycol = mydb["people"]
 
 
 redis_connection = redis.Redis(host="localhost", port=6380, db=0)  # connect redis
@@ -17,11 +37,12 @@ redis_connection = redis.Redis(host="localhost", port=6380, db=0)  # connect red
 
 connection = pika.BlockingConnection(pika.ConnectionParameters("localhost", port=5673))
 channel = connection.channel()
+print(channel)
 
 queue = channel.queue_declare("test")
 queue_name = queue.method.queue
 
-channel.queue_bind(queue=queue_name, exchange="exercise", routing_key="")
+channel.queue_bind(queue=queue_name, exchange="exercise", routing_key="exercise")
 
 
 def callback(ch, method, properties, body):
@@ -40,11 +61,10 @@ def callback(ch, method, properties, body):
     )
 
     name = payload.get("username")
-    # email = payload.get("email")
 
     if redis_connection.get(name) is None:  # get Key ถ้ายังไม่มี Key นี้
         db = payload
-        mycol.insert_one(db)  # save ลง db
+        mongo_db.insert(db)  # save ลง db
         redis_connection.set(name, name)  # set Key Value
         print("Save name into the MongoDB")
 
